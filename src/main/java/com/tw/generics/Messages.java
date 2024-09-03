@@ -28,6 +28,10 @@ public final class Messages {
 	
 	public static final String ADMISSION_AlREADY = "Admission with Student already Exist";
 	public static final String STATUS = "Status Changed Successfully";
+	
+	public static final String STOCK_UPDATED= "stock updated success!";
 
+	public static final String ITEM_AlREADY = "Item already Exist";
 
+	public static final String ITEM_CODE_AlREADY= "Item code already Exist";
 }

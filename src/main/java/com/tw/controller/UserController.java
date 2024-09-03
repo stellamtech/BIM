@@ -23,7 +23,7 @@ import jakarta.websocket.server.PathParam;
 @RestController
 @RequestMapping("/user/")
 @SecurityRequirements(value = { @SecurityRequirement(name = "bearerAuth") })
-@CrossOrigin
+//@CrossOrigin
 public class UserController {
 
 	@Autowired
