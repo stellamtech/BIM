@@ -135,7 +135,7 @@ public class StockServiceImpl implements StockService {
 		logger.info("fetching List of Products !");
 		PageRequest pg = PageRequest.of(spectDto.getPage() - 1, spectDto.getSize(), Direction.DESC,
 				com.tw.generics.AppConstants.MODIFIED);
-		Page<StockInOut> stock = stockInOutRepository.findAll(new StockinOutSpec(spectDto.getName(), spectDto.getCode()),
+		Page<StockInOut> stock = stockInOutRepository.findAll(new StockinOutSpec(spectDto.getItemName(), spectDto.getItemCode()),
 				pg);
 
 		List<StockInOutDto> list = stock.stream().map(new StockInOutCovertor()).collect(Collectors.toList());

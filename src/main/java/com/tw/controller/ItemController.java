@@ -3,7 +3,6 @@ package com.tw.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +13,8 @@ import com.tw.dto.ItemSpecDto;
 import com.tw.exception.ItemAlreadyExistsException;
 import com.tw.exception.ItemCodeAlreadyExistsException;
 import com.tw.service.ItemService;
+
+import jakarta.websocket.server.PathParam;
 
 @RestController
 @RequestMapping("/item")
@@ -28,19 +29,24 @@ public class ItemController {
 		return itemservice.saveItem(dto);
 	}
 	
-	@GetMapping("/list")
-	public ResponseEntity<?> getItems(ItemSpecDto spectDto) {
+	@PostMapping("/pagelist")
+	public ResponseEntity<?> getpageItems(ItemSpecDto spectDto) {
 		return itemservice.getItems(spectDto);
 	}
 	
 	@GetMapping("/byId/{id}")
-	public ResponseEntity<?> getItemById(@PathVariable Long id) {
+	public ResponseEntity<?> getItemById(@PathParam("id") Long id) {
 		return itemservice.getItemById(id);
 	}
 	
 	@GetMapping(value = "/delete/{id}")
-	public ResponseEntity<?> delete(@PathVariable Long id) {
+	public ResponseEntity<?> delete(@PathParam("id") Long id) {
 		return itemservice.deleteItem(id);
 
+	}
+	
+	@GetMapping("/list")
+	public ResponseEntity<?> getItems() {
+		return itemservice.getlistItems();
 	}
 }

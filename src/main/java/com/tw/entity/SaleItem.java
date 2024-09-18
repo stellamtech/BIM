@@ -17,56 +17,55 @@ import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+
 @SuppressWarnings("deprecation")
 @Entity
-@Table(name = "stock_history")
+@Table(name = "sale_invoice_item")
 @Where(clause = "deleted=false")
 @Data
 @EqualsAndHashCode(callSuper=false)
-public class StockHistory extends AbstractPersistable {
+public class SaleItem extends AbstractPersistable {
+	
+	/**
+	 * BILAL
+	 **/
 	private static final long serialVersionUID = -8667731991640624887L;
-
-	@Column(name = "voucherno", nullable = true)
-	private String voucherno;
-
-	@Column(name = "type", nullable = true)
-	private String type;
 
 	@Column(name = "qty", nullable = true)
 	private double qty;
 
-//	@ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
-//	@JoinColumn(name = "purchase_id")
-//	@JsonIgnore
-//	@NotFound(action = NotFoundAction.IGNORE)
-//	private GrnItem grnitem;
+	@Column(name = "unit_price", nullable = true)
+	private double unitPrice;
 
-	@ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
-	@JoinColumn(name = "sale_id")
-	@JsonIgnore
-	@NotFound(action = NotFoundAction.IGNORE)
-	private SaleItem saleitem;
+	@Column(name = "amount", nullable = true)
+	private double amount;
 
-	@ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
-	@JoinColumn(name = "stock_inout_id")
-	@JsonIgnore
-	@NotFound(action = NotFoundAction.IGNORE)
-	private StockInOut sio;
+	@Column(name = "discount_perc", nullable = true)
+	private double discountPerc;
+
+	@Column(name = "discount", nullable = true)
+	private double discount;
+
+	@Column(name = "total", nullable = true)
+	private double total;
+
+	@Column(name = "reference", nullable = true)
+	private String reference;
+	
+	@Column(name = "product_name", nullable = true)
+	private String productname;
 
 	@ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
 	@JoinColumn(name = "item_id")
 	@JsonIgnore
 	@NotFound(action = NotFoundAction.IGNORE)
 	private Item item;
-	
+
 	@ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
-	@JoinColumn(name = "customer_id")
+	@JoinColumn(name = "sale_invoice_id")
 	@JsonIgnore
 	@NotFound(action = NotFoundAction.IGNORE)
-	private Customer customer;
-
-	@Column(name = "status")
-	private String status;
+	private Sale sale;
 
 	
 }

@@ -12,36 +12,30 @@ import jakarta.persistence.criteria.Root;
 
 public class StockinOutSpec implements Specification<StockInOut> {
 
-
 	private static final long serialVersionUID = 1L;
 
-	private String name;
-	private String code;
-	
-	
-	
-	public StockinOutSpec(String name, String code) {
-		super();
-		this.name = name;
-		this.code = code;
-		
-		
-	}
+	private String itemName;
+	private String itemCode;
 
+	public StockinOutSpec(String itemName, String itemCode) {
+		super();
+		this.itemName = itemName;
+		this.itemCode = itemCode;
+
+	}
 
 	@Override
 	public Predicate toPredicate(Root<StockInOut> root, CriteriaQuery<?> cq, CriteriaBuilder cb) {
 
 		Predicate conjunction = cb.conjunction();
-		
-		if( StringUtils.isNotEmpty( this.name ) ) {
-			conjunction.getExpressions().add( cb.like( root.get("item").get("name") , "%" + this.name +"%" ) );
+
+		if (StringUtils.isNotEmpty(this.itemName)) {
+			conjunction.getExpressions().add(cb.like(root.get("item").get("itemName"), "%" + this.itemName + "%"));
 		}
-		
-		if( StringUtils.isNotEmpty( this.code ) ) {
-			conjunction.getExpressions().add( cb.like( root.get("item").get("code") , "%" + this.code +"%" ) );
+
+		if (StringUtils.isNotEmpty(this.itemCode)) {
+			conjunction.getExpressions().add(cb.like(root.get("item").get("itemCode"), "%" + this.itemCode + "%"));
 		}
-		
 
 		return conjunction;
 	}

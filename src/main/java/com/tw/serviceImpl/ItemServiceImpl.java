@@ -33,12 +33,12 @@ import com.tw.spec.ItemSpec;
 
 @Service
 public class ItemServiceImpl implements ItemService {
-	
+
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	@Autowired
 	private ItemRepository itemRepo;
-	
+
 	@Autowired
 	private StockRepository stockRepository;
 
@@ -48,19 +48,19 @@ public class ItemServiceImpl implements ItemService {
 
 		String message = "created success!";
 		Item item = new Item();
-		Optional<Item> optItem; 
+		Optional<Item> optItem;
 		if (dto.getId() != null && dto.getId() > 0) {
 			item = itemRepo.getById(dto.getId());
-			if(!dto.getItemName().equals(item.getItemName())) {
-				optItem =itemRepo.findOneByItemName(dto.getItemName());
+			if (!dto.getItemName().equals(item.getItemName())) {
+				optItem = itemRepo.findOneByItemName(dto.getItemName());
 				if (optItem.isPresent()) {
 					logger.info("Product already Exist");
 					throw new ItemAlreadyExistsException(Messages.ITEM_AlREADY);
 				}
 			}
-			if(!dto.getItemCode().equals(item.getItemCode())) {
-				optItem =itemRepo.findOneByItemCode(dto.getItemCode());
-				
+			if (!dto.getItemCode().equals(item.getItemCode())) {
+				optItem = itemRepo.findOneByItemCode(dto.getItemCode());
+
 				if (optItem.isPresent()) {
 					logger.info("Item Code already Exist");
 					throw new ItemCodeAlreadyExistsException(Messages.ITEM_CODE_AlREADY);
@@ -70,16 +70,16 @@ public class ItemServiceImpl implements ItemService {
 			item.setModified(Calendar.getInstance());
 			message = "updated success!";
 		} else {
-			
-			optItem =itemRepo.findOneByItemName(dto.getItemName());
-			
+
+			optItem = itemRepo.findOneByItemName(dto.getItemName());
+
 			if (optItem.isPresent()) {
 				logger.info("Product already Exist");
 				throw new ItemAlreadyExistsException(Messages.ITEM_AlREADY);
 			}
-			
-			optItem =itemRepo.findOneByItemCode(dto.getItemCode());
-			
+
+			optItem = itemRepo.findOneByItemCode(dto.getItemCode());
+
 			if (optItem.isPresent()) {
 				logger.info("Product Code already Exist");
 				throw new ItemCodeAlreadyExistsException(Messages.ITEM_CODE_AlREADY);
@@ -98,23 +98,23 @@ public class ItemServiceImpl implements ItemService {
 
 	@Override
 	public ResponseEntity<?> getItems(ItemSpecDto spectDto) {
-	    logger.info("fetching List of Products !");
-	    PageRequest pg = PageRequest.of(spectDto.getPage() - 1, spectDto.getSize(), Direction.DESC,
+		logger.info("fetching List of Products !");
+		PageRequest pg = PageRequest.of(spectDto.getPage() - 1, spectDto.getSize(), Direction.DESC,
 				com.tw.generics.AppConstants.MODIFIED);
 
-	    Page<Item> items = itemRepo.findAll(new ItemSpec(spectDto.getName(), spectDto.getCode(), spectDto.getType()), pg);
-	    List<ItemDto> list = items.stream().map(new ItemCovertor()).collect(Collectors.toList());
-	    for (ItemDto i : list) {
-	        Optional<Stock> stockop = stockRepository.findOneByItemId(i.getId());
-	        if (stockop.isPresent()) {
-	            Stock s = stockop.get();
-	            i.setStockinhand(s.getStockqty());
-	        }
-	    }
-	    PageDto pageDto = new PageDto(list, items.getTotalElements());
-	    return Response.build(Code.OK, pageDto);
+		Page<Item> items = itemRepo.findAll(new ItemSpec(spectDto.getItemName(), spectDto.getItemCode(), spectDto.getType()),
+				pg);
+		List<ItemDto> list = items.stream().map(new ItemCovertor()).collect(Collectors.toList());
+		for (ItemDto i : list) {
+			Optional<Stock> stockop = stockRepository.findOneByItemId(i.getId());
+			if (stockop.isPresent()) {
+				Stock s = stockop.get();
+				i.setStockinhand(s.getStockqty());
+			}
+		}
+		PageDto pageDto = new PageDto(list, items.getTotalElements());
+		return Response.build(Code.OK, pageDto);
 	}
-
 
 	@Override
 	public ResponseEntity<?> getItemById(Long id) {
@@ -131,6 +131,25 @@ public class ItemServiceImpl implements ItemService {
 		one.setDeleted(true);
 		itemRepo.save(one);
 		return Response.build(Code.OK, "Deleted successfully!");
+	}
+
+	@Override
+	public ResponseEntity<?> getlistItems() {
+		List<Item> list = itemRepo.findAll();
+
+		List<ItemDto> dtoList = list.stream().map(item -> {
+			ItemDto itemDto = new ItemDto();
+			BeanUtils.copyProperties(item, itemDto);
+			Optional<Stock> stockop = stockRepository.findOneByItemId(item.getId());
+			if (stockop.isPresent()) {
+				Stock s = stockop.get();
+				itemDto.setStockinhand(s.getStockqty());
+			}
+			return itemDto;
+		}).collect(Collectors.toList());
+
+		return Response.build(Code.OK, dtoList);
+
 	}
 
 }

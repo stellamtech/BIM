@@ -11,21 +11,9 @@ public class Constants {
 	public static final String STOCKOUT = "out";
 	public static final String DIRECT = "Direct";
 	
-	public static final String SALE_ENQUIRY = "SALE ENQUIRY";
-	public static final String SALE_QUOTATION = "SALE QUOTATION";
-	public static final String SALE_ORDER = "SALE ORDER";
-	public static final String DELIVERY_NOTE = "DELIVERY NOTE";
-	public static final String SALE_INVOICE = "SALE INVOICE";
-	public static final String PURCHASE_ORDER = "PURCHASE ORDER";
-	public static final String PURCHASE_INVOICE = "PURCHASE INVOICE";
-	public static final String CREDIT_NOTE = "CREDIT NOTE";
-	public static final String DEBIT_NOTE = "DEBIT NOTE";
-	public static final String CASH_PAYMENT = "CASH PAYMENT";
-	public static final String BANK_PAYMENT = "BANK PAYMENT";
-	public static final String CASH_RECEIPT = "CASH RECEIPT";
-	public static final String BANK_RECEIPT = "BANK RECEIPT";
-	public static final String JOURNAL_VOUCHER = "JOURNAL_VOUCHER";
-	public static final String OPENING_BALANCE = "OPENING_BALANCE";
+
+	public static final String SALE_INVOICE = "SALE_INVOICE";
+
 	
 	public static final String CUSTOMER = "Customer";
 	public static final String VENDOR = "Vendor";
@@ -53,6 +41,7 @@ public class Constants {
 	
 	public static final String VENDOR_CONTACT="VENDOR_CONTACT";
 	public static final String CUSTOMER_CONTACT="CUSTOMER_CONTACT";
+	public static final String CUSTOMER_NO="CUSTOMER_NO";
 	
 	public static final String SALE_STOCK="SALE_INVOICE";
 	public static final String PURCHASE_STOCK="PURCHASE_INVOICE";

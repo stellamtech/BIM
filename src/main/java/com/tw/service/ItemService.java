@@ -17,4 +17,6 @@ public interface ItemService {
 
 	ResponseEntity<?> deleteItem(Long id);
 
+	ResponseEntity<?> getlistItems();
+
 }
