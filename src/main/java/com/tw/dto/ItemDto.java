@@ -11,4 +11,5 @@ public class ItemDto {
 	private String itemCode;
 	private String itemName;
 	private BigDecimal itemPrice;
+	private double stockinhand;
 }
