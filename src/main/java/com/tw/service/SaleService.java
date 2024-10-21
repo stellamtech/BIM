@@ -3,6 +3,7 @@ package com.tw.service;
 import org.springframework.http.ResponseEntity;
 
 import com.tw.dto.SaleDto;
+import com.tw.spec.SaleSpecDto;
 
 public interface SaleService {
 
@@ -18,6 +19,7 @@ public interface SaleService {
 
 	ResponseEntity<?> getPrint(Long id);
 
-	ResponseEntity<?> getIds(Long id);
+
+	ResponseEntity<?> getSaleList(SaleSpecDto dto);
 
 }

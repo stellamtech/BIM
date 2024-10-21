@@ -15,7 +15,7 @@ public class ItemCovertor implements Function<Item, ItemDto> {
 		items.setItemName(t.getItemName());
 
 		items.setItemCode(t.getItemCode());
-
+		items.setItemPrice(t.getItemPrice());
 		return items;
 	}
 

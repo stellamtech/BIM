@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tw.dto.SaleDto;
 import com.tw.service.SaleService;
+import com.tw.spec.SaleSpecDto;
 
 
 @RestController
@@ -34,10 +35,10 @@ public class SaleController {
 		return saleService.deleteSale(id);
 	}
 	
-//	@PostMapping("list")
-//	public ResponseEntity<?> getSaleList(@RequestBody SaleSpecDto dto){
-//		return saleService.getSaleList(dto);
-//	}
+	@PostMapping("list")
+	public ResponseEntity<?> getSaleList(@RequestBody SaleSpecDto dto){
+		return saleService.getSaleList(dto);
+	}
 	@GetMapping("getbyCustomer/{id}")
 	public ResponseEntity<?> getbyCustomer(@PathVariable Long id){
 		return saleService.getbyCustomer(id);
@@ -48,13 +49,13 @@ public class SaleController {
 		return saleService.deleteitem(id);
 	}
 	
-	@GetMapping("print/{id}")
-	public ResponseEntity<?> getPrint(@PathVariable Long id){
-		return saleService.getPrint(id);
-	}
+//	@GetMapping("print/{id}")
+//	public ResponseEntity<?> getPrint(@PathVariable Long id){
+//		return saleService.getPrint(id);
+//	}
 	
-	@GetMapping("getIds/{id}")
-	public ResponseEntity<?> getIds(@PathVariable Long id){
-		return saleService.getIds(id);
-	}
+//	@GetMapping("getIds/{id}")
+//	public ResponseEntity<?> getIds(@PathVariable Long id){
+//		return saleService.getIds(id);
+//	}
 }

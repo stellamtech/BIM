@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,9 +18,13 @@ import com.tw.commands.RemoteControl;
 import com.tw.commands.SaleStock;
 import com.tw.commands.history.RemoteControlHistory;
 import com.tw.commands.history.SaleStockHistory;
+import com.tw.conv.SaleConverter;
 import com.tw.dto.ItemDto;
+import com.tw.dto.PageDto;
 import com.tw.dto.SaleDto;
+import com.tw.dto.SaleEditDto;
 import com.tw.dto.SaleItemDto;
+import com.tw.dto.SaleListDto;
 import com.tw.dto.StockDto;
 import com.tw.dto.StockHistoryDto;
 import com.tw.entity.Customer;
@@ -35,8 +40,14 @@ import com.tw.repository.SaleItemRepository;
 import com.tw.repository.SaleRepository;
 import com.tw.service.EntityIdService;
 import com.tw.service.SaleService;
+import com.tw.spec.SaleSpec;
+import com.tw.spec.SaleSpecDto;
 import com.tw.utility.Constants;
 import com.tw.utility.DecimalNumber;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort.Direction;
 
 @Service
 @Transactional
@@ -76,7 +87,7 @@ public class SaleServiceImpl implements SaleService {
 	public ResponseEntity<?> addSale(SaleDto dto) {
 		logger.info("Adding The Sale Invoice::");
 		Sale sale = new Sale();
-		if (dto.getId() != null && dto.getId()>0) {
+		if (dto.getId() != null && dto.getId() > 0) {
 			sale = saleRepository.getOne(dto.getId());
 			sale.setSaleno(dto.getSaleno());
 			sale.setModified(Calendar.getInstance());
@@ -87,39 +98,38 @@ public class SaleServiceImpl implements SaleService {
 			sale.setModified(Calendar.getInstance());
 		}
 
+		Optional<Customer> customer = java.util.Optional.empty() ;
 		if (dto.getCustomerId() != null && dto.getCustomerId() > 0) {
+			customer= customerRepo.findById(dto.getCustomerId());
+		}
+		if (customer.isPresent()) {
+			Customer ct = customer.get();
+			ct.setCustomerName(dto.getCustomerName() != null ? dto.getCustomerName() : ct.getCustomerName());
+			ct.setMobileNo(dto.getCustomerMobile() != null ? dto.getCustomerMobile() : ct.getMobileNo());
+			ct.setAddress(dto.getAddress() != null ? dto.getAddress() : ct.getAddress());
+			ct.setModified(Calendar.getInstance());
 
-			Optional<Customer> customer = customerRepo.findById(dto.getCustomerId());
-			if (customer.isPresent()) {
-				Customer ct = customer.get();
-				ct.setCustomerName(dto.getCustomerName() != null ? dto.getCustomerName() : ct.getCustomerName());
-				ct.setMobileNo(dto.getCustomerMobile() != null ? dto.getCustomerMobile() : ct.getMobileNo());
-				ct.setAddress(dto.getAddress() != null ? dto.getAddress() : ct.getAddress());
-				ct.setModified(Calendar.getInstance());
-				
-				sale.setCustomerName(dto.getCustomerName() != null ? dto.getCustomerName() : ct.getCustomerName());
-				sale.setCustomerMobile(dto.getCustomerMobile() != null ? dto.getCustomerMobile() : ct.getMobileNo());
-				sale.setAddress(dto.getAddress() != null ? dto.getAddress() : ct.getAddress());
-				
-				customerRepo.save(ct);
-				sale.setCustomer(ct);
-			} else {
-				String voucherNo = entityIdService.getvocher(Constants.CUSTOMER_CONTACT);
-				Customer ct = new Customer();
-				ct.setCustomerName(dto.getCustomerName());
-				ct.setMobileNo(dto.getCustomerMobile());
-				ct.setAddress(dto.getAddress());
-				ct.setAccno(voucherNo);
-				ct.setCreated(Calendar.getInstance());
-				ct.setModified(Calendar.getInstance());
+			sale.setCustomerName(dto.getCustomerName() != null ? dto.getCustomerName() : ct.getCustomerName());
+			sale.setCustomerMobile(dto.getCustomerMobile() != null ? dto.getCustomerMobile() : ct.getMobileNo());
+			sale.setAddress(dto.getAddress() != null ? dto.getAddress() : ct.getAddress());
 
-				sale.setCustomerName(dto.getCustomerName());
-				sale.setCustomerMobile(dto.getCustomerMobile());
-				sale.setAddress(dto.getAddress());
-				customerRepo.save(ct);
-				sale.setCustomer(ct);
-			}
+			customerRepo.save(ct);
+			sale.setCustomer(ct);
+		} else {
+			String voucherNo = entityIdService.getvocher(Constants.CUSTOMER_NO);
+			Customer ct = new Customer();
+			ct.setCustomerName(dto.getCustomerName());
+			ct.setMobileNo(dto.getCustomerMobile());
+			ct.setAddress(dto.getAddress());
+			ct.setAccno(voucherNo);
+			ct.setCreated(Calendar.getInstance());
+			ct.setModified(Calendar.getInstance());
 
+			sale.setCustomerName(dto.getCustomerName());
+			sale.setCustomerMobile(dto.getCustomerMobile());
+			sale.setAddress(dto.getAddress());
+			customerRepo.save(ct);
+			sale.setCustomer(ct);
 		}
 
 		double discount = 0;
@@ -160,7 +170,7 @@ public class SaleServiceImpl implements SaleService {
 		List<StockDto> stock = new ArrayList<StockDto>();
 		for (SaleItemDto i : dto.getSaleItem()) {
 			SaleItem s = new SaleItem();
-			if (i.getId() != null && i.getId()>0) {
+			if (i.getId() != null && i.getId() > 0) {
 				s = saleItemRepository.getOne(i.getId());
 			}
 			s.setAmount(i.getAmount());
@@ -199,27 +209,46 @@ public class SaleServiceImpl implements SaleService {
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public ResponseEntity<?> getSale(Long id) {
-		// TODO Auto-generated method stub
-		return null;
+		logger.info("Fetch Sale Invoice By Id !");
+		Sale s = saleRepository.getOne(id);
+		SaleEditDto dto = new SaleEditDto();
+		BeanUtils.copyProperties(s, dto);
+		return Response.build(Code.OK, dto);
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public ResponseEntity<?> deleteSale(Long id) {
-		// TODO Auto-generated method stub
-		return null;
+		logger.info("Fetch Sale Invoice By Id !");
+		Sale s = saleRepository.getOne(id);
+		s.setDeleted(Constants.SOFT_DELETE);
+		saleRepository.save(s);
+		return Response.build(Code.OK, Messages.DELETED);
 	}
 
 	@Override
 	public ResponseEntity<?> getbyCustomer(Long id) {
-		// TODO Auto-generated method stub
-		return null;
+		logger.info("Fetching Purchase vendor List :: ");
+		List<Sale> list = saleRepository.findBycustomerIdAndPaidflagAndStatus(id, false, Constants.AUTHORIZED);
+		List<SaleListDto> dtoList = list.stream().map(sale -> {
+			SaleListDto saleDto = new SaleListDto();
+			BeanUtils.copyProperties(sale, saleDto);
+			return saleDto;
+		}).collect(Collectors.toList());
+
+		return Response.build(Code.OK, dtoList);
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public ResponseEntity<?> deleteitem(Long id) {
-		// TODO Auto-generated method stub
-		return null;
+		logger.info("Delleting Sale items Softly !");
+		SaleItem sqt = saleItemRepository.getOne(id);
+		sqt.setDeleted(Constants.SOFT_DELETE);
+		saleItemRepository.save(sqt);
+		return Response.build(Code.OK, Messages.DELETED);
 	}
 
 	@Override
@@ -229,9 +258,20 @@ public class SaleServiceImpl implements SaleService {
 	}
 
 	@Override
-	public ResponseEntity<?> getIds(Long id) {
-		// TODO Auto-generated method stub
-		return null;
+	public ResponseEntity<?> getSaleList(SaleSpecDto spectDto) {
+
+		logger.info("fetching List of Sales !");
+		PageRequest pg = PageRequest.of(spectDto.getPage() - 1, spectDto.getSize(), Direction.DESC,
+				com.tw.generics.AppConstants.MODIFIED);
+
+		Page<Sale> sales = saleRepository.findAll(new SaleSpec(spectDto.getCustomerMobile(), spectDto.getCustomername(),
+				spectDto.getSaleno(), spectDto.getStatus(),spectDto.getSaleDate()), pg);
+
+		List<SaleListDto> list = sales.stream().map(new SaleConverter()).collect(Collectors.toList());
+
+		PageDto pageDto = new PageDto(list, sales.getTotalElements());
+		return Response.build(Code.OK, pageDto);
+
 	}
 
 }
