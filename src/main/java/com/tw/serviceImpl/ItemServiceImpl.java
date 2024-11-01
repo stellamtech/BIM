@@ -121,6 +121,12 @@ public class ItemServiceImpl implements ItemService {
 		Optional<Item> obj = itemRepo.findById(id);
 		ItemDto itemDto = new ItemDto();
 		BeanUtils.copyProperties(obj.get(), itemDto);
+		
+		Optional<Stock> stockop = stockRepository.findOneByItemId(id);
+		if (stockop.isPresent()) {
+			Stock s = stockop.get();
+			itemDto.setStockinhand(s.getStockqty());
+		}
 		return Response.build(Code.OK, itemDto);
 	}
 

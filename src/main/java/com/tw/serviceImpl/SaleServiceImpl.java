@@ -10,15 +10,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tw.commands.RemoteControl;
 import com.tw.commands.SaleStock;
+import com.tw.commands.account.RemoteControlAccounts;
+import com.tw.commands.account.SaleAccounts;
 import com.tw.commands.history.RemoteControlHistory;
 import com.tw.commands.history.SaleStockHistory;
 import com.tw.conv.SaleConverter;
+import com.tw.dto.AccountHistoryDto;
 import com.tw.dto.ItemDto;
 import com.tw.dto.PageDto;
 import com.tw.dto.SaleDto;
@@ -27,6 +34,7 @@ import com.tw.dto.SaleItemDto;
 import com.tw.dto.SaleListDto;
 import com.tw.dto.StockDto;
 import com.tw.dto.StockHistoryDto;
+import com.tw.dto.StockInOutDto;
 import com.tw.entity.Customer;
 import com.tw.entity.Item;
 import com.tw.entity.Sale;
@@ -40,14 +48,11 @@ import com.tw.repository.SaleItemRepository;
 import com.tw.repository.SaleRepository;
 import com.tw.service.EntityIdService;
 import com.tw.service.SaleService;
-import com.tw.spec.SaleSpec;
+import com.tw.service.StockService;
 import com.tw.spec.SaleSpecDto;
+import com.tw.spec.SaleSpecification;
 import com.tw.utility.Constants;
 import com.tw.utility.DecimalNumber;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort.Direction;
 
 @Service
 @Transactional
@@ -81,6 +86,15 @@ public class SaleServiceImpl implements SaleService {
 
 	@Autowired
 	private SaleStockHistory saleStockHistory;
+	
+	@Autowired
+	private SaleAccounts saleAccounts;
+	
+	@Autowired
+	private RemoteControlAccounts remoteControlAccounts;
+	
+	@Autowired
+	private StockService stockService;
 
 	@SuppressWarnings("deprecation")
 	@Override
@@ -204,6 +218,15 @@ public class SaleServiceImpl implements SaleService {
 		StockHistoryDto t = new StockHistoryDto();
 		t.setForengId(sale1.getId());
 		remoteControlHistory.addstock(saleStockHistory, t);
+		
+		AccountHistoryDto a=new AccountHistoryDto();
+		a.setSaleId(sale1.getId());
+		a.setType(Constants.SALE_INVOICE);
+		a.setVoucherno(sale1.getSaleno());
+		a.setNetAmt(sale1.getNetAmt());
+		a.setPaidAmt(sale1.getPaidAmt());
+		a.setRemainingAmt(sale1.getRemainingAmt());
+		remoteControlAccounts.addaccounts(saleAccounts, a);
 
 		return Response.build(Code.CREATED, Messages.SALE_INVOICE_ADDED);
 	}
@@ -263,14 +286,59 @@ public class SaleServiceImpl implements SaleService {
 		logger.info("fetching List of Sales !");
 		PageRequest pg = PageRequest.of(spectDto.getPage() - 1, spectDto.getSize(), Direction.DESC,
 				com.tw.generics.AppConstants.MODIFIED);
-
-		Page<Sale> sales = saleRepository.findAll(new SaleSpec(spectDto.getCustomerMobile(), spectDto.getCustomername(),
-				spectDto.getSaleno(), spectDto.getStatus(),spectDto.getSaleDate()), pg);
+		
+		Specification<Sale> spec = SaleSpecification.buildSpecification(spectDto);
+		Page<Sale> sales = saleRepository.findAll(spec, pg);
 
 		List<SaleListDto> list = sales.stream().map(new SaleConverter()).collect(Collectors.toList());
 
 		PageDto pageDto = new PageDto(list, sales.getTotalElements());
 		return Response.build(Code.OK, pageDto);
+
+	}
+
+	@SuppressWarnings("deprecation")
+	@Override
+	public ResponseEntity<?> salePayment(AccountHistoryDto dto) {
+
+		Sale sale = new Sale();
+		if (dto.getSaleId() != null && dto.getSaleId() > 0) {
+			sale = saleRepository.getOne(dto.getSaleId());
+			sale.setModified(Calendar.getInstance());
+			sale.setRemainingAmt(dto.getRemainingAmt());
+
+			double paidAmt = sale.getPaidAmt();
+			sale.setPaidAmt(paidAmt + dto.getPaidAmt());
+			if (dto.getRemainingAmt() <= 0) {
+				sale.setPaidflag(Boolean.TRUE);
+			}
+			if(dto.getStockReturn().equals("Y") && !sale.getStockflag()){
+					
+				for (SaleItem item : sale.getSaleItem()) {
+					StockInOutDto in=new StockInOutDto();
+					in.setDate(Calendar.getInstance());
+					in.setItemId(item.getItem().getId());
+					in.setQty(item.getQty());
+					in.setStockin(item.getQty());
+					in.setType("in");
+					
+					stockService.adjustStock(in);
+				}
+				sale.setStockflag(Boolean.TRUE);	
+			}
+			Sale sale1 = saleRepository.save(sale);
+			AccountHistoryDto a = new AccountHistoryDto();
+			a.setSaleId(sale1.getId());
+			a.setType(Constants.SALE_PAYMENT);
+			a.setVoucherno(sale1.getSaleno());
+			a.setNetAmt(dto.getNetAmt());
+			a.setPaidAmt(dto.getPaidAmt());
+			a.setRemainingAmt(dto.getRemainingAmt());
+			remoteControlAccounts.addaccounts(saleAccounts, a);
+			return Response.build(Code.CREATED, Messages.SALE_PAYMENT_ADDED);
+		} else {
+			return Response.build(Code.INTERNAL_SERVER_ERROR, Messages.SALE_INVOICE_NOT_AVLB);
+		}
 
 	}
 

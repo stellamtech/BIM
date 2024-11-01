@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.tw.dto.AccountHistoryDto;
 import com.tw.dto.SaleDto;
 import com.tw.service.SaleService;
 import com.tw.spec.SaleSpecDto;
@@ -48,7 +49,10 @@ public class SaleController {
 	public ResponseEntity<?> deleteitem(@PathVariable Long id){
 		return saleService.deleteitem(id);
 	}
-	
+	@PostMapping(value ="salePayment")
+	public ResponseEntity<?> salePayment(@RequestBody AccountHistoryDto dto) {
+		return saleService.salePayment(dto);
+	}
 //	@GetMapping("print/{id}")
 //	public ResponseEntity<?> getPrint(@PathVariable Long id){
 //		return saleService.getPrint(id);

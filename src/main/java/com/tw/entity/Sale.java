@@ -85,5 +85,6 @@ public class Sale extends AbstractPersistable{
 	@JsonIgnore
 	private List<SaleItem> saleItem;
 	
-	
+	@Column(name = "stock_flag", nullable = false)
+	private Boolean stockflag = false;
 }

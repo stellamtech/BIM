@@ -35,4 +35,6 @@ public final class Messages {
 
 	public static final String ITEM_CODE_AlREADY= "Item code already Exist";
 	public static final String SALE_INVOICE_ADDED = "Sale Invoice addedd successfully!";
+	public static final String SALE_PAYMENT_ADDED = "Sale Payment addedd successfully!";
+	public static final String SALE_INVOICE_NOT_AVLB = "Sale Invoice is not available!";
 }
