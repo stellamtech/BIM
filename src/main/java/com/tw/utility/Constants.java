@@ -58,4 +58,5 @@ public class Constants {
 	public static final String JOURNAL_VOUCHER_DEBIT = "JOURNAL_VOUCHER_DEBIT";
 	public static final String OPENING_BALANCE_CREDIT = "OPENING_BALANCE_CREDIT";
 	public static final String OPENING_BALANCE_DEBIT = "OPENING_BALANCE_DEBIT";
+	public static final String COMPLETED="Completed";
 }

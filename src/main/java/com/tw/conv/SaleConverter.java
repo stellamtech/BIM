@@ -26,6 +26,8 @@ public class SaleConverter implements Function<Sale, SaleListDto> {
 		dto.setSaledate(t.getSaledate());
 		dto.setSaleno(t.getSaleno());
 		dto.setStatus(t.getStatus());
+		dto.setPaidflag(t.getPaidflag());
+		dto.setStockflag(t.getStockflag());
 		
 		List<SaleItemDto> list=new ArrayList<>();
 		for (SaleItem saleItem : t.getSaleItem()){

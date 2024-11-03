@@ -177,7 +177,7 @@ public class SaleServiceImpl implements SaleService {
 		sale.setAdvanceAmt(advamt);
 
 		sale.setNaration(dto.getNaration());
-		sale.setSaledate(dto.getSaledate());
+		sale.setSaledate(dto.getSaledate()  != null ? dto.getSaledate() : Calendar.getInstance());
 		sale.setStatus(dto.getStatus());
 
 		List<SaleItem> saleItem = new ArrayList<>();
@@ -311,6 +311,8 @@ public class SaleServiceImpl implements SaleService {
 			sale.setPaidAmt(paidAmt + dto.getPaidAmt());
 			if (dto.getRemainingAmt() <= 0) {
 				sale.setPaidflag(Boolean.TRUE);
+				if(sale.getStockflag())
+					sale.setStatus(Constants.COMPLETED);
 			}
 			if(dto.getStockReturn().equals("Y") && !sale.getStockflag()){
 					
@@ -325,6 +327,8 @@ public class SaleServiceImpl implements SaleService {
 					stockService.adjustStock(in);
 				}
 				sale.setStockflag(Boolean.TRUE);	
+				if(sale.getPaidflag())
+					sale.setStatus(Constants.COMPLETED);
 			}
 			Sale sale1 = saleRepository.save(sale);
 			AccountHistoryDto a = new AccountHistoryDto();

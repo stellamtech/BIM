@@ -1,26 +1,30 @@
 package com.tw.dto;
 
 import java.util.Calendar;
-import java.util.List;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-public class SaleListDto {
+@NoArgsConstructor
+@AllArgsConstructor
+public class SaleItemReportDto {
 
-	private Long id;
-	private String saleno;
-	private Calendar saledate;
+	private String itemName;
+	private double qty;
+	private double unitPrice;
+	private double itemAmount;
+	
 	private String customerName;
 	private String customerMobile;
-	private double grossAmt;
-	private double discount;
-	
+	private Calendar saleDate;
+	private String saleNo;
+
 	private double netAmt;
 	private double paidAmt;
 	private double remainingAmt;
 	private String status;
 	private Boolean paidflag;
 	private Boolean stockflag;
-	private List<SaleItemDto> saleItemDto;
 }
